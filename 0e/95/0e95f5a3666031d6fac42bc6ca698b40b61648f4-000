@@ -72,3 +72,7 @@ La première version de ce skill (préparation du rendez-vous Andreas) est rempl
 ## 23 October 2026 : la journée se pose par zenray-calendar-plan
 
 - Les blocs de prospection et les rendez-vous se placent par `node /Users/zenray/.claude/skills/zenray-calendar-plan/scripts/CalendarPlan.mjs fit --spec <jour>.json --apply` (blocs de 15 minutes, jamais deux choses en même temps, `check` pour le prouver) ; `zenray-plan` est supprimé et remplacé. (23 October 2026)
+
+## 24 October 2026 : article généré depuis ce skill
+
+- La procédure manuelle de la section « Projet Assets et article » (modifier Article-23-October-2026.json, rendre, refiler) est remplacée : l'article est généré depuis ce SKILL.md (`ARTICLE.json` de ce skill, entrée zenray-sales de `/Users/zenray/.claude/skills/zenray-edit/articles/Registry.json`) et republié à chaque synchronisation. On modifie ce SKILL.md, jamais l'article. (24 October 2026)

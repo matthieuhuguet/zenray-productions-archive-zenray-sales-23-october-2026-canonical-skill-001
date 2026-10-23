@@ -1,0 +1,11 @@
+{
+  "_doc": "24 October 2026 : the Assets article of this skill is rebuilt from SKILL.md by zenray-edit/scripts/refresh-articles.mjs (entry zenray-sales of articles/Registry.json), run by sync-skill.sh and the LaunchAgent com.zenray.articles-refresh. Edit SKILL.md, never the article.",
+  "projectId": "zenray-sales-23-october-2026",
+  "title": "ZenRay Sales",
+  "slug": "zenray-sales",
+  "eyebrow": "Vente et prospection",
+  "lead": "Skill de conseil en vente, tarification, statut juridique et prospection. Cet article est généré depuis le skill à chaque consignation.",
+  "workshop": "/Users/zenray/.claude/tmp/tmp-zenray-sales-23-october-2026",
+  "hero": { "image": "Drafts/Article/assets/calculateur-euros-par-heure-23-October-2026.png", "alt": "Barres comparant la prospection, le store d’assets et la construction d’un outil, en euros par heure.", "text": "Chaque arbitrage de vente se ramène à un calcul en euros par heure.", "caption": "Calculateur SalesMath.mjs, hypothèses par défaut." },
+  "skipSections": []
+}
