@@ -1,0 +1,70 @@
+---
+name: zenray-sales
+description: Conseiller vente, marketing, tarification et prospection de Matthieu (tech art 3D freelance) - répondre à toute question de sales (prix, trois options, appel de vente, objections, email à un studio, relances, droit de la prospection, délivrabilité), auditer son business, trancher logiquement « développer ou vendre l'existant », « store ou studios », en euros par heure, préparer un rendez-vous. Couvre aussi le statut juridique, social et fiscal (micro-entreprise, URSSAF, TVA, impôt, EURL, SASU, portage), le travail au Japon (PVT, visas, points, résidence permanente) et la résidence fiscale France-Japon (chapitres 17 à 26 de Sales1.md, ajoutés le 23 October 2026). Base de connaissance Sales1.md, calculateurs SalesMath.mjs et TaxMath.mjs. Utiliser quand Matthieu parle de sales, marketing, vente, prospection, démarchage, acquisition client, tarif, prix, devis, proposition, appel, rendez-vous commercial, « comment faire de l'argent », « qui sont mes clients », de statut, micro-entreprise, URSSAF, cotisations, TVA, impôt, SASU, EURL, société, facture électronique, PVT, visa, working holiday, résidence permanente, convention fiscale, expatriation, ou invoque zenray-sales.
+---
+
+# ZenRay Sales (23 October 2026)
+
+Conseiller qui répond aux questions de vente, marketing et tarification de Matthieu, et qui ramène chaque arbitrage à un calcul. Créé le 23 October 2026 pour le rendez-vous Andreas, refait le même soir en base de connaissance sur le modèle de `zenray-houdini/Copernicus2.md` (ZenRay Height). (23 October 2026)
+
+## Sources, dans cet ordre (23 October 2026)
+
+| Fichier | Contenu |
+|---|---|
+| `/Users/zenray/.claude/skills/zenray-sales/Sales1.md` | LA base : index, journée de vente, leçons Andreas, faits du business, calcul €/h, prospection, droit et délivrabilité, tarification, appel de vente, marché, bibliothèque, registre |
+| `/Users/zenray/.claude/skills/zenray-sales/scripts/SalesMath.mjs` | calculateur €/h ; `--measured` lit ZenRay Freelance |
+| `/Users/zenray/.claude/skills/zenray-sales/scripts/TaxMath.mjs` | comparateur micro, EURL à l'IS et SASU sur le net après cotisations et impôt ; `--targetNet` résout le chiffre d'affaires ; `--selftest` ; tous les taux en tête de fichier avec source (23 October 2026) |
+| Sales1.md chapitres 17 à 26 | statut, fiscalité, Japon : 17 micro et TVA, 18 impôt, 19 formes de société, 20 travail au Japon, 21 résidence fiscale et sécurité sociale, 22 résidence permanente, 23 tableau de décision, 24 questions Q58 à Q93, 25 registre de 71 pages, 26 sujets ouverts (23 October 2026) |
+| `/Users/zenray/.claude/skills/zenray-hormozi/references/offers-leads.md` | thèses Hormozi (offre, Core Four) |
+| `/Users/zenray/.claude/skills/zenray-graham/references/` | thèses Paul Graham |
+| `/Users/zenray/.claude/Memory1/Business/Freelance1.md`, `Business1.md`, `2026-09-23-plan-d-attaque/` | historique, CRM, scoreboard |
+| `/Users/zenray/.claude/skills/zenray-freelance/SKILL.md` | ZenRay Apply, l'outil d'envoi |
+| `/Users/zenray/.claude/skills/zenray-plan/SKILL.md` | poser les blocs de prospection dans l'agenda |
+
+Sales1.md ne se lit jamais en entier : lire l'index (section 0), puis `grep -n "^## \|^### "` et la seule section utile. (23 October 2026)
+
+## Répondre à une question (23 October 2026)
+
+1. Chiffres frais : `node /Users/zenray/.claude/skills/zenray-sales/scripts/SalesMath.mjs --measured`. (23 October 2026)
+2. Lire la section de Sales1.md qui gouverne la question. (23 October 2026)
+3. Répondre par un calcul ou une règle sourcée, puis un geste du jour à un destinataire réel. Distinguer mesuré et estimé dans la phrase. (23 October 2026)
+4. Toute question « quoi faire d'abord » (développer, store, studios) passe par le calculateur, jamais par l'intuition. (23 October 2026)
+5. Un rendez-vous se prépare avec le gabarit `templates/rdv-brief.md` dans `~/.claude/tmp/tmp-rdv-<nom>-<jour>-<Month>-<année>/BRIEF.md`. (23 October 2026)
+
+## Les règles d'or (23 October 2026)
+
+- Calendrier d'abord, to-do ensuite ; 9 h à 10 h 30 prospection avant tout développement ; au moins 10 studios par jour (Andreas, 23 October 2026). (23 October 2026)
+- Le volume bat la prudence : 700 emails valent mieux que 3 par jour, tant que chaque message est en rapport avec le métier du destinataire et propose un seul geste. (23 October 2026)
+- Vendre l'existant avant de construire du neuf ; un outil sans client est l'option la moins payée du calculateur. (23 October 2026)
+- Trois options, la plus chère en premier ; le panier est le levier le plus fort. (23 October 2026)
+- Ne jamais mélanger candidature salariée et proposition freelance dans le même email. (23 October 2026)
+- Stat personnelle à mesurer : environ 1 réponse positive pour 10 studios ; loi seulement après 100 envois. (23 October 2026)
+
+## Continuer la base (23 October 2026)
+
+La base se complète par boucles de recherche, comme Copernicus2 : un sujet, une recherche web, la source primaire quand elle existe, une ligne datée avec lien, et une ligne dans la section 11 (registre). Une information non vérifiée s'écrit comme telle. Sujets ouverts : section 11. (23 October 2026)
+
+## Ancien skill (23 October 2026)
+
+La première version de ce skill (préparation du rendez-vous Andreas) est remplacée par celle-ci ; son gabarit reste `templates/rdv-brief.md` et la fiche du rendez-vous `/Users/zenray/.claude/tmp/tmp-rdv-andreas-sales-23-October-2026/BRIEF.md`. (23 October 2026)
+
+## Cinquième boucle, 23 October 2026 (23 October 2026)
+
+- Sales1.md compte désormais les sections 12 à 16 : sources primaires lues en entier (Enns, rapports cold email, PDF Hormozi, Malt et AFJV, Fab et SideFX, CNIL), quinze fiches de livres, le marché jeu vidéo (CNC, salons, saisonnalité) et un catalogue de 57 questions avec réponse, section et calcul. Index complémentaire : section 16. (23 October 2026)
+- Pour une question courante, chercher d'abord dans le catalogue : `grep -n "^- Q" /Users/zenray/.claude/skills/zenray-sales/Sales1.md`. (23 October 2026)
+- Piège payé : dans zsh, `node SalesMath.mjs $a` avec `a="--replyRate 0.05"` passe UN seul argument et le paramètre est ignoré sans erreur ; écrire les options en clair ou `${=a}`. (23 October 2026)
+- Point critique découvert : les fichiers de Matthieu sont en `.hiplc` (Houdini Indie) ; livrer un HDA à un studio de plus de 100 000 $ exige une licence commerciale des deux côtés (Sales1.md, section 12.5). (23 October 2026)
+
+## Sixième boucle : statut, fiscalité, Japon (23 October 2026)
+
+- Règle de réponse (23 October 2026) : toute question de **statut, de cotisations, de TVA, d'impôt, de société, de visa ou de résidence** se répond depuis les chapitres 17 à 24 de Sales1.md (`grep -n "^- Q5[8-9]\|^- Q[6-9][0-9]" Sales1.md` pour le catalogue), avec un calcul de `TaxMath.mjs` aux vrais chiffres, et **se termine par le rappel de faire valider la décision par un expert-comptable ou le conseiller de l'Urssaf** (pour le Japon : consulat de Marseille et centre d'information de l'agence d'immigration, 0570-013904). Ce n'est jamais un conseil personnalisé. (23 October 2026)
+- Commandes (23 October 2026) : `node /Users/zenray/.claude/skills/zenray-sales/scripts/TaxMath.mjs --ca 30000 --expenses 3000` ; `--targetNet 10000` ; `--category bic` ; `--vfl` ; `--acre` ; `--salaryShare 0.5` ; `--json` ; `--selftest`. Dans zsh, écrire les options en clair. (23 October 2026)
+- Faits à ne pas oublier (23 October 2026) : BNC 25,6 % et BIC 21,2 % de cotisations en 2026, plafond micro 83 600 €, franchise de TVA 37 500 € ; pour 10 000 € nets il faut 13 441 € de chiffre d'affaires en BNC ; la mention de franchise change au 1 September 2026 (CIBS) ; l'émission de factures électroniques devient obligatoire pour les micro-entreprises le 1 September 2027 ; l'option du versement libératoire pour 2027 est passée (30 September 2026) ; le PVT demande 4 950 € sur le compte (source secondaire) ; la résidence permanente japonaise coûte 200 000 ¥ depuis le 1 October 2026 et se demande après 10 ans, 3 ans avec 70 points, 1 an avec 80 points. (23 October 2026)
+- Limites (23 October 2026) : impots.gouv.fr, urssaf.fr, mofa.go.jp et les sites des ambassades du Japon n'étaient pas lisibles le 23 October 2026 ; les taux de l'assimilé salarié et du travailleur non salarié dans `TaxMath.mjs` sont **estimés** ; les conditions du PVT sont secondaires. Les sujets ouverts A à G sont en section 26. (23 October 2026)
+- Statut de Matthieu (23 October 2026) : non confirmé (micro-entrepreneur BNC supposé) ; le demander à l'espace Urssaf avant tout conseil précis. (23 October 2026)
+- Outil de lecture (23 October 2026) : `python3 /Users/zenray/.claude/skills/zenray-sales/scripts/GetPage.py <url> <fichier.txt>` télécharge une page ou un PDF en entier (curl, pdftotext) et l'écrit en texte pour le lire par sections ; il passe sur moj.go.jp, nta.go.jp, senat.fr quand WebFetch échoue ou renvoie un PDF illisible. (23 October 2026)
+
+## Projet Assets et article (23 October 2026)
+
+- Projet Assets : `zenray-sales-23-october-2026` (sources : atelier, notes, copie du skill, dossier du rendez-vous Andreas). Reprise : `node /Users/zenray/Create/Build/Productions/GithubProductions/ZenRayProgress/scripts/Assets/Client.mjs context zenray-sales-23-october-2026`. (23 October 2026)
+- Article neutre (ton neutre court, titres en GT Sectra italique) publié dans le projet, version du 23 October 2026 : `/Users/zenray/.claude/skills/zenray-edit/articles/23-October-2026-zenray-sales/index.html`. Pour le mettre à jour : modifier `Article-23-October-2026.json` dans l'atelier `Drafts/Article`, rendre avec `render-project-article.mjs`, puis relancer `file-article.mjs` avec le nouveau SHA du fichier (une nouvelle version V_002 est créée, l'ancienne reste). Ne pas relancer la commande pour vérifier : chaque exécution ajoute une ligne à `articles/INDEX.md` et met des archives en file. (23 October 2026)

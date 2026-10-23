@@ -1,0 +1,191 @@
+#!/usr/bin/env node
+// TaxMath.mjs (23 October 2026, 19:40 Paris): compares micro-entreprise, EURL (IS) and SASU on net money after contributions and income tax, from sourced rates.
+// FR : compare micro-entreprise, EURL (IS) et SASU sur le net après cotisations et impôt, à partir de taux sourcés. ESTIMATION PÉDAGOGIQUE, pas un conseil fiscal ; l'expert-comptable tranche.
+//
+//   node TaxMath.mjs --ca 30000                       # compare the three statuses at 30 000 EUR of revenue
+//   node TaxMath.mjs --ca 30000 --category bic        # BIC services instead of BNC
+//   node TaxMath.mjs --ca 30000 --expenses 3000       # real business expenses (not deductible in micro)
+//   node TaxMath.mjs --targetNet 10000                # revenue needed to reach 10 000 EUR net, per status
+//   node TaxMath.mjs --ca 70000 --salaryShare 0.5     # half of company profit as salary, half kept then paid as dividends (SASU/EURL)
+//   node TaxMath.mjs --ca 30000 --json
+//   node TaxMath.mjs --selftest                       # checks the arithmetic against hand-computed values
+//
+// Every number below is a parameter with its source and read date. Change a value in PARAMS, never in the code.
+// FR : chaque chiffre est un paramètre avec sa source et sa date de lecture ; on change PARAMS, jamais le code.
+
+const PARAMS = {
+  // ---- Situation / situation du foyer ----
+  ca: 30000,                 // annual revenue excl. VAT, EUR / chiffre d'affaires HT annuel
+  category: 'bnc',           // 'bnc' (non-regulated liberal activity, Matthieu's likely case) or 'bic' (services)
+  expenses: 0,               // real business expenses paid in the year, EUR / frais professionnels réels
+  parts: 1,                  // quotient familial parts (single = 1) / parts de quotient familial
+  otherIncome: 0,            // other taxable household income, EUR / autres revenus imposables du foyer
+  salaryShare: 1,            // share of company profit paid as salary in EURL/SASU (0 to 1); rest = retained, IS then dividends
+  acre: false,               // ACRE on micro rate during the first period / ACRE sur le taux micro
+  vfl: false,                // versement libératoire option (micro) / option versement libératoire
+  targetNet: 0,              // if > 0, solve the revenue that gives this net / si > 0, résout le CA pour ce net
+
+  // ---- Micro-entreprise : service-public F36232 (verified 1 January 2026), F23267 (13 May 2026), F11677 (1 July 2026) ----
+  microRate: { bnc: 0.256, bic: 0.212 },        // micro-social contribution rates 2026 (BNC non-regulated, BIC services)
+  microRateVfl: { bnc: 0.278, bic: 0.229 },     // same with versement libératoire (cotisations + VFL together)
+  vflRate: { bnc: 0.022, bic: 0.017 },          // VFL income-tax rate on revenue
+  acreFactor: 0.75,                             // ACRE: 75 % of the normal rate (25 % reduction) from 1 July 2026 creations
+  abatement: { bnc: 0.34, bic: 0.50 },          // flat abatement for micro-tax
+  abatementMin: 305,                            // minimum abatement, EUR
+  microCeiling: 83600,                          // revenue ceiling for services 2026, EUR
+  vatFranchise: 37500,                          // VAT franchise threshold for services, EUR (majoré 41 250)
+
+  // ---- Income tax scale on 2025 income (declared 2026) : service-public F1419 (verified 15 April 2026) ----
+  brackets: [[11600, 0], [29579, 0.11], [84577, 0.30], [181917, 0.41], [Infinity, 0.45]],
+  // Not modelled: décote, quotient-family cap, CEHR / non modélisés : décote, plafonnement du quotient, CEHR
+
+  // ---- Companies / sociétés ----
+  isReducedRate: 0.15, isReducedCeiling: 42500, isNormalRate: 0.25,   // service-public F36006 (2 March 2026) and F37383
+  pfu: 0.314,                                                          // flat tax on dividends, 12.8 + 18.6 (service-public F36006, 2 March 2026)
+  salaryDeduction: 0.10,                                               // standard 10 % deduction on salary for income tax (ESTIMATE, general rule, not read on a page here)
+  // TNS (EURL manager): rates summed from service-public F38152 (verified 8 October 2026) : retraite base 17.87 + complémentaire 8.1 + IJ 0.5 + invalidité 1.3 + CSG/CRDS 9.7 + maladie about 6 + CFP 120 EUR
+  tnsRateOnNet: 0.45,         // contributions as a share of net remuneration, ESTIMATE (rule of thumb 40 to 50 %)
+  // Assimilé salarié (SASU president): employer and employee rates are ESTIMATES (Urssaf rate pages not readable on 23 October 2026)
+  sasuEmployerRate: 0.42,     // employer contributions as share of gross, no unemployment, no general reduction / ESTIMATE
+  sasuEmployeeRate: 0.22,     // employee contributions + CSG/CRDS as share of gross / ESTIMATE
+  eurlCapital: 1000,          // share capital of the EURL, EUR; dividends above 10 % of it bear TNS contributions (service-public F37777, 21 Feb 2026; Urssaf extract) 
+  tnsDividendRate: 0.40,      // contributions on the dividend part above 10 % of capital, ESTIMATE
+  accountantEURL: 1800,       // yearly accountant fee, EUR, ESTIMATE of market (ask for quotes)
+  accountantSASU: 1800,       // idem
+  companyYearFees: 150,       // bank, insurance, misc yearly, EUR, ESTIMATE
+  creationFees: 53.16 + 150,  // 33.83 + 19.33 (service-public F37688, 18 March 2026) + legal announcement ESTIMATE 150
+}
+
+// ---- Arguments / arguments ----
+const args = process.argv.slice(2)
+const flag = (k) => args.includes(`--${k}`)
+for (let i = 0; i < args.length; i++) {
+  const k = args[i].replace(/^--/, '')
+  if (!(k in PARAMS) || ['microRate', 'microRateVfl', 'vflRate', 'abatement', 'brackets'].includes(k)) continue
+  if (typeof PARAMS[k] === 'boolean') PARAMS[k] = args[i + 1] === 'true' || args[i + 1] === '1' || !args[i + 1] || args[i + 1].startsWith('--')
+  else if (typeof PARAMS[k] === 'number') PARAMS[k] = Number(args[++i])
+  else if (typeof PARAMS[k] === 'string') PARAMS[k] = args[++i]
+}
+const P = PARAMS
+if (!['bnc', 'bic'].includes(P.category)) { console.error(`category must be bnc or bic, got "${P.category}"`); process.exit(2) }
+
+// ---- Core / noyau ----
+function incomeTax(taxable, parts = P.parts) {
+  // Quotient system: tax per part times parts / système du quotient
+  const q = Math.max(0, taxable) / parts
+  let tax = 0, low = 0
+  for (const [high, rate] of P.brackets) {
+    if (q > low) tax += (Math.min(q, high) - low) * rate
+    low = high
+  }
+  return tax * parts
+}
+
+function companyProfitTax(profit) {
+  const p = Math.max(0, profit)
+  const reduced = Math.min(p, P.isReducedCeiling)
+  return reduced * P.isReducedRate + (p - reduced) * P.isNormalRate
+}
+
+function micro(ca) {
+  const cat = P.category
+  const rateBase = P.vfl ? P.microRateVfl[cat] : P.microRate[cat]
+  const rate = P.acre ? (P.vfl ? P.microRate[cat] * P.acreFactor + (P.microRateVfl[cat] - P.microRate[cat]) : rateBase * P.acreFactor) : rateBase
+  const contributions = ca * rate
+  const abate = Math.max(ca * P.abatement[cat], P.abatementMin)
+  const taxableMicro = P.vfl ? 0 : Math.max(0, ca - abate)
+  const tax = P.vfl ? 0 : incomeTax(taxableMicro + P.otherIncome) - incomeTax(P.otherIncome)
+  const netAfter = ca - contributions - tax - P.expenses
+  const warnings = []
+  if (ca > P.microCeiling) warnings.push(`above the micro ceiling (${P.microCeiling} EUR)`)
+  if (ca > P.vatFranchise) warnings.push(`above the VAT franchise threshold (${P.vatFranchise} EUR)`)
+  return { status: `Micro-entreprise ${cat.toUpperCase()}${P.vfl ? ' + VFL' : ''}${P.acre ? ' + ACRE' : ''}`, ca, contributions, companyTax: 0, dividendTax: 0, incomeTax: tax, netAfterTax: netAfter, fixedCosts: P.expenses, warnings }
+}
+
+function profitBeforeManager(ca, accountant) {
+  return ca - P.expenses - accountant - P.companyYearFees
+}
+
+function eurl(ca) {
+  const B = profitBeforeManager(ca, P.accountantEURL)
+  const toSalary = Math.max(0, B) * P.salaryShare
+  const net = toSalary / (1 + P.tnsRateOnNet)                 // net remuneration after TNS contributions / rémunération nette
+  const contributions = net * P.tnsRateOnNet + (toSalary > 0 ? 120 : 0)
+  const netRem = Math.max(0, net - (toSalary > 0 ? 120 : 0))
+  const retained = Math.max(0, B) - toSalary
+  const isTax = companyProfitTax(retained)
+  const dividend = retained - isTax
+  // Dividends above 10 % of capital are subject to TNS contributions (not only the flat tax) / dividendes au-delà de 10 % du capital soumis aux cotisations TNS
+  const excess = Math.max(0, dividend - 0.10 * P.eurlCapital)
+  const dividendContrib = excess * P.tnsDividendRate
+  const dividendTax = (dividend - excess) * P.pfu + excess * 0.128 + dividendContrib
+  const taxableSalary = netRem * (1 - P.salaryDeduction)
+  const ir = incomeTax(taxableSalary + P.otherIncome) - incomeTax(P.otherIncome)
+  const netAfter = netRem - ir + dividend - dividendTax
+  return { status: 'EURL à l\'IS', ca, contributions, companyTax: isTax, dividendTax, incomeTax: ir, netAfterTax: netAfter, fixedCosts: P.expenses + P.accountantEURL + P.companyYearFees, warnings: B < 0 ? ['company loses money'] : [] }
+}
+
+function sasu(ca) {
+  const B = profitBeforeManager(ca, P.accountantSASU)
+  const toSalary = Math.max(0, B) * P.salaryShare
+  const gross = toSalary / (1 + P.sasuEmployerRate)
+  const contributions = gross * P.sasuEmployerRate + gross * P.sasuEmployeeRate
+  const netBeforeTax = gross * (1 - P.sasuEmployeeRate)
+  const retained = Math.max(0, B) - toSalary
+  const isTax = companyProfitTax(retained)
+  const dividend = retained - isTax
+  const dividendTax = dividend * P.pfu
+  const taxableSalary = netBeforeTax * (1 - P.salaryDeduction)
+  const ir = incomeTax(taxableSalary + P.otherIncome) - incomeTax(P.otherIncome)
+  const netAfter = netBeforeTax - ir + dividend - dividendTax
+  return { status: 'SASU (président assimilé salarié)', ca, contributions, companyTax: isTax, dividendTax, incomeTax: ir, netAfterTax: netAfter, fixedCosts: P.expenses + P.accountantSASU + P.companyYearFees, warnings: B < 0 ? ['company loses money'] : [] }
+}
+
+const STATUSES = { micro, eurl, sasu }
+
+function solveForNet(fn, target) {
+  // Bisection on revenue / dichotomie sur le CA
+  let lo = 0, hi = 2_000_000
+  for (let i = 0; i < 80; i++) {
+    const mid = (lo + hi) / 2
+    if (fn(mid).netAfterTax < target) lo = mid; else hi = mid
+  }
+  return hi
+}
+
+function report() {
+  const rows = P.targetNet > 0
+    ? Object.values(STATUSES).map((fn) => fn(solveForNet(fn, P.targetNet)))
+    : Object.values(STATUSES).map((fn) => fn(P.ca))
+  return rows.map((r) => ({ ...r, netShare: r.ca ? r.netAfterTax / r.ca : 0 }))
+}
+
+// ---- Self test / auto-test : hand-computed expectations ----
+if (flag('selftest')) {
+  const near = (a, b, tol = 0.01) => Math.abs(a - b) <= tol
+  const checks = []
+  // Income tax 1 part on 30 000 EUR taxable: (29 579-11 600)*11 % + (30 000-29 579)*30 % = 1977.69 + 126.30 = 2103.99
+  checks.push(['incomeTax(30000)', near(incomeTax(30000, 1), 2103.99, 0.05)])
+  // Micro BNC at 10 000 EUR: contributions 2560 ; abatement 3400 ; taxable 6600 -> 0 tax ; net 7440
+  const m = micro(10000)
+  checks.push(['micro BNC 10 000 contributions 2560', near(m.contributions, 2560)])
+  checks.push(['micro BNC 10 000 net 7440', near(m.netAfterTax, 7440)])
+  // IS: 42 500 at 15 % = 6375 ; 50 000 -> 6375 + 7500*25 % = 8250
+  checks.push(['IS 50 000 = 8250', near(companyProfitTax(50000), 8250)])
+  // Negative control: a wrong expectation must fail (tests the tester) / contrôle négatif
+  checks.push(['negative control (must be false)', !near(incomeTax(30000, 1), 2200, 0.05)])
+  let ok = true
+  for (const [name, pass] of checks) { console.log(`${pass ? 'OK  ' : 'FAIL'} ${name}`); ok = ok && pass }
+  process.exit(ok ? 0 : 1)
+}
+
+const rows = report()
+if (flag('json')) { console.log(JSON.stringify({ params: P, rows }, null, 2)); process.exit(0) }
+
+const eur = (n) => `${Math.round(n).toLocaleString('fr-FR')} €`.padStart(11)
+console.log(`Catégorie ${P.category.toUpperCase()}, ${P.parts} part(s), frais réels ${P.expenses} €, part de salaire ${(P.salaryShare * 100).toFixed(0)} % (sociétés)${P.targetNet ? `, cible nette ${P.targetNet} €` : ''}`)
+console.log('Statut'.padEnd(36) + 'CA HT'.padStart(11) + 'Cotis.'.padStart(11) + 'IS'.padStart(11) + 'IR'.padStart(11) + 'Div. PFU'.padStart(11) + 'Net final'.padStart(11) + '  Net/CA')
+for (const r of rows) {
+  console.log(r.status.padEnd(36) + eur(r.ca) + eur(r.contributions) + eur(r.companyTax) + eur(r.incomeTax) + eur(r.dividendTax) + eur(r.netAfterTax) + `  ${(r.netShare * 100).toFixed(0)} %` + (r.warnings.length ? `  ! ${r.warnings.join(' ; ')}` : ''))
+}
+console.log('ESTIMATION PÉDAGOGIQUE : taux salariés/TNS estimés, sans décote ni ARE ni droits à retraite ; à faire valider par un expert-comptable.')

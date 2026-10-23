@@ -1,0 +1,78 @@
+#!/usr/bin/env node
+// SalesMath.mjs (23 October 2026, 18:10 Paris): compare money-making options in euros per hour, from measured rates, never guessed.
+// FR : compare les options pour gagner de l'argent en euros par heure, à partir de taux mesurés, jamais devinés.
+//
+//   node SalesMath.mjs                          # every option with default parameters
+//   node SalesMath.mjs --replyRate 0.05         # override any parameter
+//   node SalesMath.mjs --measured               # read real reply counts from ZenRay Freelance
+//   node SalesMath.mjs --json
+import fs from 'node:fs'
+import os from 'node:os'
+import path from 'node:path'
+
+// Parameters, one place. Defaults = Matthieu's stated numbers on 23 October 2026, to replace with measurements.
+// FR : paramètres, un seul endroit ; défauts = chiffres donnés par Matthieu le 23 October 2026, à remplacer par des mesures.
+const PARAMS = {
+  // Outreach to studios / prospection des studios
+  contacts: 30,              // emails sent
+  minutesPerContact: 9,      // 10 emails in 1 h 30 (Andreas block)
+  replyRate: 0.10,           // positive replies per email (Matthieu: about 1 in 10, not official)
+  closeRate: 0.33,           // signed contracts per positive reply (estimate)
+  ticket: 500,               // average contract, euros
+  deliveryHours: 8,          // hours to deliver one contract
+  callHours: 1,              // discovery call + proposal per positive reply
+  // Asset store / store d'assets
+  assetPrice: 20,            // euros per sale
+  storeShare: 0.88,          // Fab seller share since 2025
+  salesPerMonth: 5,          // estimate for a new seller with no audience
+  assetHours: 20,            // hours to make and list one asset
+  assetMarketingHours: 3,    // hours of promotion per asset
+  horizonMonths: 6,          // how long we count store sales
+  // Building a new tool before selling / construire un nouvel outil avant de vendre
+  toolHours: 40,
+  toolProbabilitySold: 0.2,  // chance it sells at all without prior demand (estimate)
+  toolTicket: 1500,
+  freelanceDbPath: path.join(os.homedir(), 'Library/Application Support/ZenRayFreelance/DataClone/freelance/applications.json'),
+}
+
+const args = process.argv.slice(2)
+const flag = (k) => args.includes(`--${k}`)
+for (let i = 0; i < args.length; i++) {
+  const k = args[i].replace(/^--/, '')
+  if (k in PARAMS && typeof PARAMS[k] === 'number') PARAMS[k] = Number(args[++i])
+}
+
+// Measured rates from ZenRay Freelance. A failed read is reported, never treated as zero.
+// FR : taux mesurés depuis ZenRay Freelance ; une lecture ratée est signalée, jamais lue comme zéro.
+let measured = null
+if (flag('measured')) {
+  try {
+    const data = JSON.parse(fs.readFileSync(PARAMS.freelanceDbPath, 'utf8'))
+    // The file is { ..., <list>: [...] }; take the longest array. / le fichier contient une liste ; on prend la plus longue.
+    const rows = Array.isArray(data) ? data : Object.values(data).filter(Array.isArray).sort((a, b) => b.length - a.length)[0]
+    if (!rows) throw new Error('no list in applications.json')
+    const count = (s) => rows.filter((r) => r.status === s).length
+    const sent = count('contacted') + count('replied') + count('declined')
+    measured = { sent, replied: count('replied'), declined: count('declined'), toContact: count('to_contact') }
+    if (sent >= 20) PARAMS.replyRate = measured.replied / sent
+  } catch (e) { measured = { error: e.message } }
+}
+
+const p = PARAMS
+const outreachHours = (p.contacts * p.minutesPerContact) / 60
+const positives = p.contacts * p.replyRate
+const contracts = positives * p.closeRate
+const outreach = { option: 'Prospection directe des studios', euros: contracts * p.ticket, hours: outreachHours + positives * p.callHours + contracts * p.deliveryHours }
+const storeEuros = p.salesPerMonth * p.horizonMonths * p.assetPrice * p.storeShare
+const store = { option: `Un asset sur le store (${p.horizonMonths} mois)`, euros: storeEuros, hours: p.assetHours + p.assetMarketingHours }
+const tool = { option: 'Construire un outil puis le vendre', euros: p.toolProbabilitySold * p.toolTicket, hours: p.toolHours }
+const options = [outreach, store, tool].map((o) => ({ ...o, eurosPerHour: o.hours ? o.euros / o.hours : 0 })).sort((a, b) => b.eurosPerHour - a.eurosPerHour)
+
+const breakEvenReply = (p.ticket * p.closeRate) // euros per positive reply
+const result = { params: p, measured, positives: +positives.toFixed(2), contracts: +contracts.toFixed(2), options, salesNeededToMatchOneContract: Math.ceil(p.ticket / (p.assetPrice * p.storeShare)), eurosPerPositiveReply: breakEvenReply }
+
+if (flag('json')) { console.log(JSON.stringify(result, null, 2)); process.exit(0) }
+if (measured) console.log(measured.error ? `Mesure impossible : ${measured.error}` : `Mesuré : ${measured.sent} envoyés, ${measured.replied} réponses positives, ${measured.declined} refus ; taux utilisé ${(p.replyRate * 100).toFixed(1)} %${measured.sent < 20 ? ' (moins de 20 envois : défaut gardé)' : ''}`)
+console.log(`${p.contacts} contacts -> ${positives.toFixed(1)} réponses positives -> ${contracts.toFixed(2)} contrats de ${p.ticket} €`)
+for (const o of options) console.log(`${o.eurosPerHour.toFixed(0).padStart(5)} €/h  ${o.euros.toFixed(0).padStart(6)} € en ${o.hours.toFixed(1)} h  ${o.option}`)
+console.log(`Ventes d'asset pour égaler un contrat : ${result.salesNeededToMatchOneContract}`)

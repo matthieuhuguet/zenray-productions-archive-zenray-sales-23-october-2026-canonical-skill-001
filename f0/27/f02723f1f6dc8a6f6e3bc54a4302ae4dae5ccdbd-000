@@ -1,0 +1,20 @@
+#!/usr/bin/env python3
+# Fetch a URL (HTML or PDF) and write plain text to a file; print size. FR: récupère une page entière en texte.
+import sys, subprocess, re, html, os
+url, out = sys.argv[1], sys.argv[2]
+UA = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Safari/605.1.15"
+raw = subprocess.run(["curl","-sL","-m","60","--http1.1","-A",UA,"-H","Accept-Language: en-US,en;q=0.9,fr;q=0.8","-o","/dev/stdout","-w","\n%{http_code}",url],capture_output=True).stdout
+code = raw[-3:].decode(); body = raw[:-4]
+if code != "200": print("HTTP", code); sys.exit(1)
+if body[:4] == b"%PDF":
+    open(out+".pdf","wb").write(body)
+    subprocess.run(["pdftotext","-layout",out+".pdf",out])
+else:
+    t = body.decode("utf-8","replace")
+    t = re.sub(r"(?is)<(script|style|noscript).*?</\1>","",t)
+    t = re.sub(r"(?i)<br\s*/?>|</(p|div|li|tr|h\d|table|section)>","\n",t)
+    t = re.sub(r"(?s)<[^>]+>","",t)
+    t = html.unescape(t)
+    t = re.sub(r"[ \t ]+"," ",t); t = re.sub(r"\n\s*\n+","\n\n",t)
+    open(out,"w").write(t)
+print("OK", os.path.getsize(out), "bytes", out)
