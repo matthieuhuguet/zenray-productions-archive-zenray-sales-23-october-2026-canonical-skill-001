@@ -19,7 +19,7 @@ Conseiller qui répond aux questions de vente, marketing et tarification de Matt
 | `/Users/zenray/.claude/skills/zenray-graham/references/` | thèses Paul Graham |
 | `/Users/zenray/.claude/Memory1/Business/Freelance1.md`, `Business1.md`, `2026-09-23-plan-d-attaque/` | historique, CRM, scoreboard |
 | `/Users/zenray/.claude/skills/zenray-freelance/SKILL.md` | ZenRay Apply, l'outil d'envoi |
-| `/Users/zenray/.claude/skills/zenray-plan/SKILL.md` | poser les blocs de prospection dans l'agenda |
+| `/Users/zenray/.claude/skills/zenray-calendar-plan/SKILL.md` | poser les blocs de prospection dans l'agenda |
 
 Sales1.md ne se lit jamais en entier : lire l'index (section 0), puis `grep -n "^## \|^### "` et la seule section utile. (23 October 2026)
 
@@ -68,3 +68,7 @@ La première version de ce skill (préparation du rendez-vous Andreas) est rempl
 
 - Projet Assets : `zenray-sales-23-october-2026` (sources : atelier, notes, copie du skill, dossier du rendez-vous Andreas). Reprise : `node /Users/zenray/Create/Build/Productions/GithubProductions/ZenRayProgress/scripts/Assets/Client.mjs context zenray-sales-23-october-2026`. (23 October 2026)
 - Article neutre (ton neutre court, titres en GT Sectra italique) publié dans le projet, version du 23 October 2026 : `/Users/zenray/.claude/skills/zenray-edit/articles/23-October-2026-zenray-sales/index.html`. Pour le mettre à jour : modifier `Article-23-October-2026.json` dans l'atelier `Drafts/Article`, rendre avec `render-project-article.mjs`, puis relancer `file-article.mjs` avec le nouveau SHA du fichier (une nouvelle version V_002 est créée, l'ancienne reste). Ne pas relancer la commande pour vérifier : chaque exécution ajoute une ligne à `articles/INDEX.md` et met des archives en file. (23 October 2026)
+
+## 23 October 2026 : la journée se pose par zenray-calendar-plan
+
+- Les blocs de prospection et les rendez-vous se placent par `node /Users/zenray/.claude/skills/zenray-calendar-plan/scripts/CalendarPlan.mjs fit --spec <jour>.json --apply` (blocs de 15 minutes, jamais deux choses en même temps, `check` pour le prouver) ; `zenray-plan` est supprimé et remplacé. (23 October 2026)
