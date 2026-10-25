@@ -6,6 +6,12 @@
   "eyebrow": "Vente et prospection",
   "lead": "Skill de conseil en vente, tarification, statut juridique et prospection. Cet article est généré depuis le skill à chaque consignation.",
   "workshop": "/Users/zenray/.claude/tmp/tmp-zenray-sales-23-october-2026",
-  "hero": { "image": "Drafts/Article/assets/calculateur-euros-par-heure-23-October-2026.png", "alt": "Barres comparant la prospection, le store d’assets et la construction d’un outil, en euros par heure.", "text": "Chaque arbitrage de vente se ramène à un calcul en euros par heure.", "caption": "Calculateur SalesMath.mjs, hypothèses par défaut." },
-  "skipSections": []
+  "hero": {
+    "image": "Drafts/Article/assets/calculateur-euros-par-heure-23-October-2026.png",
+    "alt": "Barres comparant la prospection, le store d’assets et la construction d’un outil, en euros par heure.",
+    "text": "Chaque arbitrage de vente se ramène à un calcul en euros par heure.",
+    "caption": "Calculateur SalesMath.mjs, hypothèses par défaut."
+  },
+  "skipSections": [],
+  "theme": "galerie"
 }
