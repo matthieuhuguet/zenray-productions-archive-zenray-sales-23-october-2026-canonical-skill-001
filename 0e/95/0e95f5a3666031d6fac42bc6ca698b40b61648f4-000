@@ -76,3 +76,7 @@ La première version de ce skill (préparation du rendez-vous Andreas) est rempl
 ## 24 October 2026 : article généré depuis ce skill
 
 - La procédure manuelle de la section « Projet Assets et article » (modifier Article-23-October-2026.json, rendre, refiler) est remplacée : l'article est généré depuis ce SKILL.md (`ARTICLE.json` de ce skill, entrée zenray-sales de `/Users/zenray/.claude/skills/zenray-edit/articles/Registry.json`) et republié à chaque synchronisation. On modifie ce SKILL.md, jamais l'article. (24 October 2026)
+
+## 30 October 2026 : rendez-vous clients, la qualification d'abord (conseils d'Andreas)
+
+- 30 October 2026 : avant de proposer une offre ou un tarif, préparer avec Matthieu la liste de questions de qualification (mission, besoin, budget, délai, CDI ou freelance, lieu) ; deux options : premier rendez-vous de questions puis deuxième rendez-vous d'offre, ou 4 à 5 slides d'offre dès le premier rendez-vous. Ne pas parler Houdini en phase de qualification. Notes complètes : `/Users/zenray/.claude/Memory1/Business/Andreas1.md`. (30 October 2026)
