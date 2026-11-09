@@ -86,3 +86,7 @@ La première version de ce skill (préparation du rendez-vous Andreas) est rempl
 - La base de connaissance n'est plus `Sales1.md` mais `/Users/zenray/.claude/Memory1/ZenRayKnight/ZenRayKnight1.md`, qui réunit sans perte Sales1.md (partie 5, repères K-S00 à K-S28), Business1.md, Freelance1.md, Andreas1.md et le reste de l'ancien dossier Business ; Matthieu l'a nommée Zenray Knight, le personnage qui part en campagne pour financer l'atelier (partie 8). (9 November 2026)
 - Les numéros de section de l'ancien Sales1.md sont conservés dans la partie 5. Pour trouver une section : `grep -n "K-S" /Users/zenray/.claude/Memory1/ZenRayKnight/ZenRayKnight1.md` (repères datés) ou `grep -n "^- Q" /Users/zenray/.claude/Memory1/ZenRayKnight/ZenRayKnight1.md` (catalogue des questions). Les mentions de Sales1.md plus haut désignent cette partie 5. (9 November 2026)
 - Toute nouvelle connaissance de vente s'ajoute à la fin de ZenRayKnight1.md, jamais dans un fichier concurrent. (9 November 2026)
+
+## 9 November 2026 : contexte par ZenRay Past (9 November 2026)
+
+- 9 November 2026 : pour retrouver le passé de ce domaine (décisions, valeur actuelle et versions dépassées, conversations, notes du jour, commits), interroger d'abord ZenRay Past, MCP `zenray-past` (`past_recall`, `past_resume`), avant de relire de gros fichiers ; voir la priorité 0 du CLAUDE.md global. (9 November 2026)
